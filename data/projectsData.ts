@@ -1,19 +1,19 @@
 const projectsData = [
   {
-    title: 'A Search Engine',
-    description: `What if you could look up any information in the world? Webpages, images, videos
-    and more. Google has many features to help you find exactly what you're looking
-    for.`,
-    imgSrc: '/static/images/google.png',
-    href: 'https://www.google.com',
+    title: 'Use Fewer Socket Servers with uWebSockets.js',
+    description: `As engineering teams look to save money wherever they can, cutting
+    infrastructure costs is a clear low hanging fruit. By swapping NodeJS frameworks, we decreased memory consumption
+    and latency, but there are a few gotchas.`,
+    imgSrc: '/static/images/uWebSockets.png',
+    href: '/blog/use-fewer-socket-servers-with-uWebSockets',
   },
   {
-    title: 'The Time Machine',
-    description: `Imagine being able to travel back in time or to the future. Simple turn the knob
-    to the desired date and press "Go". No more worrying about lost keys or
-    forgotten headphones with this simple yet affordable solution.`,
-    imgSrc: '/static/images/time-machine.jpg',
-    href: '/blog/the-time-machine',
+    title: 'Security: Bundle your NodeJS App into a Single Script',
+    description: `The size and security of node_modules is the concern of every DevSecOps Engineer.
+    By bundling our node_modules, we eliminated the threat of bad actors calling vulnerable dependencies
+    and reduced our Docker image size by 90%.`,
+    imgSrc: '/static/images/bunlde-node.jpg',
+    href: '/blog/security-bundle-your-nodejs-app-into-a-single-script',
   },
 ]
 
