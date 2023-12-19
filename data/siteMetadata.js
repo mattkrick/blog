@@ -2,14 +2,13 @@
 const siteMetadata = {
   title: 'Matthew Krick | Technical Co-founder, Principal Engineer',
   author: 'Matthew Krick',
-  headerTitle: 'Technical Blog',
-  description:
-    'A blog about the technologies used to build resilient products and successful companies',
+  headerTitle: 'Matthew Krick',
+  description: 'Lessons learned from building resilient products and successful companies',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'https://mattkrick.dev',
   siteRepo: 'https://github.com/mattkrick/blog',
-  siteLogo: '/static/images/logo.png',
+  siteLogo: '/static/images/avatar.jpeg',
   socialBanner: '/static/images/twitter-card.png',
   mastodon: '',
   email: 'matt.krick@gmail.com',
