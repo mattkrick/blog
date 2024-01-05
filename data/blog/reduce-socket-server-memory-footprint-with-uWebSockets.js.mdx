@@ -29,7 +29,7 @@ The decision depends on factors like the scale of your application, budget const
 
 In our case, we had to serve clients in air-gapped deployments, so a dependency on a cloud-based server was untenable.
 Even without this constraint, we likely would have opted for the self-hosted solution due to cost and flexibility.
-While a cloud-based solution is quick and inexpense to start with, the price starts to hurt as you grown and achieve product market fit.
+While a cloud-based solution is quick and inexpensive to start with, the price starts to hurt as you grow and achieve product market fit.
 
 ## Migrating to uWebSockets.js
 
@@ -39,7 +39,7 @@ That said, it is a clear winner in terms of performance, and cutting edge runtim
 
 ### Ending the Response
 
-One of the first challenges encountered during the migration to uWebSockets.js is understanding how a response can end. The server can send a terminating write, e.g. `res.end()`, or the client can hang up between asynchronous actions like a DB read. This complexity is hidden away with higher-level frameworks, but with uWebSockets, it's your responsibility to make sure each response is terminated once, and only once. That means no calling `res.end()` twice, or calling it after the client hung up. To fulfill that contract, you can either write perfect code, or you can write an abstraction that is a bit more forgiving. For example, to prevent `res.end()` from getting called twice, you can proxy it. Below we're setting a one-way `done` flag on the object that shortcircuits when called twice.
+One of the first challenges encountered during the migration to uWebSockets.js is understanding how a response can end. The server can send a terminating write, e.g. `res.end()`, or the client can hang up between asynchronous actions like a DB read. This complexity is hidden away with higher-level frameworks, but with uWebSockets, it's your responsibility to make sure each response is terminated once, and only once. That means no calling `res.end()` twice, or calling it after the client hangs up. To fulfill that contract, you can either write perfect code, or you can write an abstraction that is a bit more forgiving. For example, to prevent `res.end()` from getting called twice, you can proxy it. Below we're setting a one-way `done` flag on the object that short circuits when called twice.
 
 ```ts
 res._end = res.end
@@ -99,7 +99,7 @@ const handler = async (req: HTTPRequest, res: HTTPResponse) => {
 }
 ```
 
-While it is technically possible to rewrite each route handler to comply with the new pattern, it would take a great deal of time, and any future code edits would be suceptible to making the same mistake again. A better approach would be to remove the footgun so it isn't possible for future developers to make the same mistake.
+While it is technically possible to rewrite each route handler to comply with the new pattern, it would take a great deal of time, and any future code edits would be susceptible to making the same mistake again. A better approach would be to remove the footgun so it isn't possible for future developers to make the same mistake.
 
 To achieve this, we proxied the `res` object to cache all writes until the response was complete.
 
@@ -186,7 +186,7 @@ const pipeStreamOverResponse = (
 
 In addition to WebSockets, uWebSockets.js supports Server Sent Events (SSE), which enable servers to push updates to clients over a single HTTP connection.
 Integrating SSE alongside WebSockets can support clients who are stuck behind firewalls that terminate WebSockets prematurely.
-First, you'll have to disable Nagle's Algorithm, which is a TCP optimiztion to batch chunks together.
+First, you'll have to disable Nagle's Algorithm, which is a TCP optimization to batch chunks together.
 If your app is behind an ingress like, you may have to disable it via response header, too.
 Finally, `tryEnd` accepts the `content-size` as a second argument. If this value is set arbitrarily large, the response will not close.
 The end result is an initial response that looks like this:
