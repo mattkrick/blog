@@ -1,0 +1,55 @@
+---
+title: Speed Up CI with cached NPM Installs
+date: '2024-Jan-15'
+tags: ['NodeJS', 'CI/CD', 'GitHub', 'DevOps']
+draft: false
+summary: Learn how to safely speed up CI builds by going against recommended practices
+---
+
+Shaving a minute off your build time saves more than the couple pennies charged by your CI provider.
+It means critical hotfixes land sooner.
+It also means developers are less likely to get distracted while waiting, start browsing the web, and forget they had a build happening in the first place.
+Recently, I had the task of reducing our build times down from 45 minutes. I got it down to under 5.
+One of the biggest offenders was installing node dependencies, so I started there.
+
+## The slow code
+
+```yml
+- name: Cache node modules
+  id: cache-npm
+  uses: actions/cache@v3
+  env:
+    cache-name: cache-node-modules
+  with:
+    # npm cache files are stored in `~/.npm` on Linux/macOS
+    path: ~/.npm
+    key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+    restore-keys: |
+      ${{ runner.os }}-build-${{ env.cache-name }}-
+      ${{ runner.os }}-build-
+      ${{ runner.os }}-
+```
+
+Above we see the code that is recommended by GitHub.
+It caches the `.npm` directory (or `.yarn` if you prefer) that is stored in the home directory.
+This works fine to cache remote fetches, but it has a downfall-- it still has to perform an install on each dependency.
+That adds up, especially if your project includes a lot of dependencies with `.node` binaries that have to get compiled.
+
+## The Fast Code
+
+````yml
+- name: Get cached node modules
+  id: cache
+  uses: actions/cache@v3
+  with:
+    path: |
+      **/node_modules
+    key: node_modules-${{ runner.arch }}-${{ env.NODE_VERSION }}-${{ hashFiles('yarn.lock') }}
+```
+
+To improve upon this, we cache all the `node_modules` directories _after_ the build took place.
+That means no installation necessary!
+So what's the catch? Builds are now specific to the architecture and node version.
+To allieviate this problem, we simply include those variables as the cache key.
+Just like that, builds are now much faster.
+````
