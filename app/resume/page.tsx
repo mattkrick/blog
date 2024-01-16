@@ -99,13 +99,13 @@ export default function Page() {
                 <CardContent>
                   {work.areas?.map((area) => {
                     return (
-                      <div className="">
+                      <div className="" key={area.title}>
                         <h4 className="pt-2 font-mono text-base leading-none print:text-sm">
                           {area.title}
                         </h4>
                         <ul className="list-disc pl-4 font-mono text-sm print:text-xs">
                           {area.bullets.map((bullet) => {
-                            return <li>{bullet}</li>
+                            return <li key={bullet}>{bullet}</li>
                           })}
                         </ul>
                       </div>

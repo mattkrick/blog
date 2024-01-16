@@ -97,6 +97,7 @@ export const RESUME_DATA = {
       logo: '',
       start: '2014',
       end: '2016',
+      areas: [],
     },
     {
       company: 'Ecos Consulting (now ENGIE)',
@@ -106,6 +107,7 @@ export const RESUME_DATA = {
       logo: '',
       start: '2010',
       end: '2014',
+      areas: [],
     },
     {
       company: 'Boeing',
@@ -115,6 +117,7 @@ export const RESUME_DATA = {
       logo: '',
       start: '2009',
       end: '2010',
+      areas: [],
     },
   ],
   skills: [
