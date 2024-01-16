@@ -3,12 +3,10 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Metadata } from 'next'
 import { Section } from '@/components/ui/section'
-import { GlobeIcon, MailIcon, PhoneIcon } from 'lucide-react'
+import { GlobeIcon, PhoneIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { RESUME_DATA } from '@/data/resume-data'
-import { ProjectCard } from '@/components/project-card'
 import SocialIcon from '../../components/social-icons'
-import siteMetadata from '../../data/siteMetadata'
 
 export const metadata: Metadata = {
   title: `${RESUME_DATA.name} | ${RESUME_DATA.about}`,
@@ -38,23 +36,17 @@ export default function Page() {
             <div className="text-muted-foreground flex gap-x-1 pt-1 font-mono text-sm print:hidden">
               {RESUME_DATA.contact.email ? (
                 <Button className="size-8" variant="outline" size="icon" asChild>
-                  <a href={`mailto:${RESUME_DATA.contact.email}`}>
-                    <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} size={5} />
-                  </a>
+                  <SocialIcon kind="mail" href={`mailto:${RESUME_DATA.contact.email}`} size={5} />
                 </Button>
               ) : null}
               {RESUME_DATA.contact.tel ? (
                 <Button className="size-8" variant="outline" size="icon" asChild>
-                  <a href={`tel:${RESUME_DATA.contact.tel}`}>
-                    <PhoneIcon className="size-4" />
-                  </a>
+                  <PhoneIcon href={`tel:${RESUME_DATA.contact.tel}`} className="size-4" />
                 </Button>
               ) : null}
               {RESUME_DATA.contact.social.map((social) => (
                 <Button key={social.name} className="size-8" variant="outline" size="icon" asChild>
-                  <a href={social.url}>
-                    <SocialIcon kind={social.icon} href={`mailto:${siteMetadata.email}`} size={5} />
-                  </a>
+                  <SocialIcon kind={social.icon} href={social.url} size={5} />
                 </Button>
               ))}
             </div>
@@ -78,18 +70,18 @@ export default function Page() {
           </Avatar>
         </div>
         <Section>
-          <h2 className="pt-6 text-xl font-bold">About</h2>
-          <p className="text-muted-foreground text-pretty font-mono text-sm">
+          <h2 className="pt-6 text-xl font-bold print:pt-1 print:text-lg">About</h2>
+          <p className="text-muted-foreground text-pretty font-mono text-sm print:text-xs">
             {RESUME_DATA.summary}
           </p>
         </Section>
         <Section>
-          <h2 className="pt-6 text-xl font-bold">Work Experience</h2>
+          <h2 className="pt-6 text-xl font-bold print:pt-1 print:text-lg">Work Experience</h2>
           {RESUME_DATA.work.map((work) => {
             return (
-              <Card key={work.company} className="pb-2">
+              <Card key={work.company} className="pb-2 last:pb-0">
                 <CardHeader>
-                  <div className="flex items-center justify-between gap-x-2 text-lg">
+                  <div className="flex items-center justify-between gap-x-2 text-lg print:text-base">
                     <h3 className="inline-flex items-center justify-center gap-x-1 font-semibold leading-none">
                       {!work.link ? (
                         work.company
@@ -107,9 +99,11 @@ export default function Page() {
                 <CardContent>
                   {work.areas?.map((area) => {
                     return (
-                      <div className="pl-2">
-                        <h4 className="pt-2 font-mono text-base leading-none">{area.title}</h4>
-                        <ul className="list-disc pl-4 font-mono text-sm">
+                      <div className="">
+                        <h4 className="pt-2 font-mono text-base leading-none print:text-sm">
+                          {area.title}
+                        </h4>
+                        <ul className="list-disc pl-4 font-mono text-sm print:text-xs">
                           {area.bullets.map((bullet) => {
                             return <li>{bullet}</li>
                           })}
@@ -125,7 +119,7 @@ export default function Page() {
           })}
         </Section>
         <Section>
-          <h2 className="pt-6 text-xl font-bold">Education</h2>
+          <h2 className="pt-6 text-xl font-bold print:pt-1 print:text-lg">Education</h2>
           {RESUME_DATA.education.map((education) => {
             return (
               <Card key={education.school}>
@@ -143,10 +137,14 @@ export default function Page() {
           })}
         </Section>
         <Section>
-          <h2 className="pt-6 text-xl font-bold">Skills</h2>
-          <div className="flex flex-wrap gap-1">
+          <h2 className="pt-6 text-xl font-bold print:pt-1 print:text-lg">Skills</h2>
+          <div className="flex flex-wrap justify-center gap-1 print:gap-0">
             {RESUME_DATA.skills.map((skill) => {
-              return <Badge key={skill}>{skill}</Badge>
+              return (
+                <Badge key={skill} className="">
+                  {skill}
+                </Badge>
+              )
             })}
           </div>
         </Section>
