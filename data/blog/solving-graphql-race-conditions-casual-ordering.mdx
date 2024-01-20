@@ -1,0 +1,83 @@
+---
+title: Solving GraphQL Race Conditions with Casual Ordering
+date: '2024-Jan-19'
+tags: ['NodeJS', 'GraphQL', 'TypeScript']
+draft: false
+summary: Prevent race conditions in non-idempotent GraphQL Mutations
+---
+
+## The Problem
+
+Things aren't always received in the order that they're sent.
+Even with the guarantee of TCP, the load balancer could lag or a worker could be slow to respond.
+The problem gets even worse when expecting responses to return in the same order as the requests are sent.
+Recently, we ran into this exact problem where some GraphQL mutation responses would take longer than others.
+The root cause was that only some response payloads required a fetch to a third party service, and those would take longer.
+
+## Possible Solutions
+
+Knowing that responses won't return in the same order as their corresponding requests are sent, how could we fix the problem?
+On the server, we could implement a lock on that mutation. When a mutation starts, it creates a lock in Redis for that particular user. If it can't achieve the lock, then it waits its turn. This is known as a mutex. While it's a good solution, it has some drawbacks. First, it's a blocking operation, which means that if a mutation takes a long time to complete, then all subsequent mutations will be blocked until the first mutation is completed. Second, it's not very scalable. If we have a lot of users, then we'll have a lot of locks. Third, it's not very resilient. If a worker crashes while processing a mutation, then the lock will be left in Redis, and the next worker will have to wait for the lock to be released. As a general rule of thumb, if we can keep state off the server, we should do that.
+
+In our case, the mutation was idempotent. It simply removed an item from a list by ID and returned the updated list.
+If the same mutation got called twice, or if the requests were received out of order, the eventual result would be the same.
+Those characteristics meant we could avoid the penalties of a mutex by using casual ordering on the client.
+
+## Client-side Casual Ordering
+
+Setting up casual ordering on the client is essentially a queue.
+Before a request is sent to the server, we check for the casual ordering key.
+If one doesn't exist, then we know order isn't important.
+If one does exist, we assign an incrementing serial ID to the request.
+When a response is received, we verify that its request is the lowest value in the queue.
+If it is, the request gets processed immediately & the item is removed from the queue.
+If it isn't, the payload is cached until the earlier request is processed.
+
+That's it! Of course you can get more sophisticated with timeouts, but the basic idea is the same.
+Let's see how it looks in code as a method
+
+```ts
+dispatch(message: IncomingMessage) {
+  const {id: opId} = message
+  const operation = this.operations[opId]
+  const {payload} = operation
+  const casualOrderingGroup = payload.cacheConfig?.metadata?.casualOrderingGroup ?? null
+  if (casualOrderingGroup) {
+    const expectedOpIdMismatch = Object.keys(this.operations).find(
+      (id) =>
+        id < opId &&
+        this.operations[id].payload.cacheConfig?.metadata?.casualOrderingGroup ===
+          casualOrderingGroup,
+    )
+    if (expectedOpIdMismatch) {
+      // the message dispatched is out of order. queue it until the correct one comes in
+      this.pendingMessages.push(message)
+      return
+    }
+  }
+
+  // the message received is the one that should be dispatched, handle the message
+  ...
+
+  // attempt to flush the queue
+  if (casualOrderingGroup && this.pendingMessages.length > 0) {
+    const nextOpIdInGroup = Object.keys(this.operations).find(
+      (id) =>
+        this.operations[id].payload.cacheConfig?.metadata?.casualOrderingGroup ===
+        casualOrderingGroup,
+    )
+    const pendingMessageIdx = this.pendingMessages.findIndex(
+      (pendingMessage) => pendingMessage.id === nextOpIdInGroup,
+    )
+    if (pendingMessageIdx === -1) return
+    const [messageToFlush] = this.pendingMessages.splice(pendingMessageIdx, 1)
+    this.dispatch(messageToFlush)
+  }
+}
+```
+
+## Conclusion
+
+I hope this helps you solve race conditions in your GraphQL mutations.
+While it's still preferable to write mutations that don't require a strict order, sometimes that isn't possible.
+When ordering is required, it's nice to know there's a client-side approach that you can apply without adding complexity to your server. If you'd like to see a full working example in code, you can [check out the repository here](https://github.com/mattkrick/graphql-trebuchet-client/blob/master/src/GQLTrebuchetClient.ts).
